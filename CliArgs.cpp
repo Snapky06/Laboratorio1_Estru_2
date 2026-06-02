@@ -6,8 +6,8 @@ CliArgs::CliArgs(int argc, char* argv[]){
 }
 
 void CliArgs::printUsage(){
-    std::cout << "Usage: " << program << 
-    "\n--file <filename> [--insert-student | --delete-student <account>| --search-student<account>|--update-student<account>]\n"
+    std::cout << "Usage: " << program << "\n" <<
+    "\n--file <filename> --index <indexname> [--insert-student | --delete-student <account>| --search-student<account>|--update-student<account>]\n"
     << "\n--insert-student : Inserts a student\n"
     << "\n--delete-student <account> : Deletes an especified student\n"
     << "\n--search-student <account> : Searches for the student records at the specificied account\n"
