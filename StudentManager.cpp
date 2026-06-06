@@ -1,6 +1,13 @@
 #include "StudentManager.hpp"
 #include <cstring>
 
+StudentManager::StudentManager(std::string filename, std::string index)
+{
+    filename_ = filename;
+    index_ = index;
+    open();
+}
+
 bool StudentManager::open()
 {
     std::fstream f(filename_,std::ios::binary|std::ios::in|std::ios::out);
@@ -99,7 +106,6 @@ bool StudentManager::saveIndex()
 
 int StudentManager::findIndexPosition(std::string account)
 {
-    loadIndex();
     int left = 0;
     int right = indexes.size() - 1;
 
@@ -120,7 +126,6 @@ int StudentManager::findIndexPosition(std::string account)
 
 bool StudentManager::insertIndexOrdered(index new_index)
 {
-    loadIndex();
     for(int i = 0;i< indexes.size() - 1; i++){
 
         int cmp = strcmp(indexes[i].account,new_index.account);
@@ -129,12 +134,10 @@ bool StudentManager::insertIndexOrdered(index new_index)
 
         if(cmp > 0){
             indexes.insert(indexes.begin() + i, new_index);
-            saveIndex();
             return true;
         }
     }
 
     indexes.push_back(new_index);
-    saveIndex();
     return  false;
 }

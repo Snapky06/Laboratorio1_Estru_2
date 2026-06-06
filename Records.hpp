@@ -1,4 +1,7 @@
 #include <string>
+#include <nlohmann/json.hpp>
+
+namespace nl = nlohmann;
 
 struct index
 {
@@ -15,6 +18,30 @@ struct Student
     int age;
     char date[8];
 };
+
+void to_json(nl::json& j,const Student& s)
+{
+    j = {
+        {"account", std::string(s.account,sizeof(s.account))},
+        {"name",s.name},
+        {"telephone",std::string(s.telephone),sizeof(s.telephone)},
+        {"age",s.age},
+        {"date",std::string(s.date),sizeof(s.date)}
+    };
+}
+
+void from_json(const nl::json& j,Student& s)
+{
+    std::string account = j.at("account").get<std::string>();
+    std::string telephone = j.at("telephone").get<std::string>();
+    std::string date = j.at("date").get<std::string>();
+
+    memcpy(s.account,account.c_str(),sizeof(s.account));
+    s.name = j.at("name").get<std::string>();
+    memcpy(s.telephone,telephone.c_str(),sizeof(s.telephone));
+    s.age = j.at("age").get<int>();
+    memcpy(s.date,date.c_str(),sizeof(s.date));
+}
 
 /*
 Linea De Comando
