@@ -5,6 +5,35 @@ bool StudentManager::addRegister(std::string file)
     
 }
 
+std::optional<Student> StudentManager::searchStudent(std::string account)
+{
+    std::ifstream f(filename_,std::ios::binary);
+    if(!f.is_open())return std::nullopt;
+
+    int pos = findIndexPosition(account);   
+    if(pos == -1)return std::nullopt;
+
+    f.seekg(indexes[pos].offset,std::ios::beg);
+    if(!f)return std::nullopt;
+
+    Student s;
+    int name_size = 0;
+
+    f.read(reinterpret_cast<char*>(&s.account),sizeof(s.account));
+    f.read(reinterpret_cast<char*>(&name_size),sizeof(name_size));
+
+    s.name.resize(name_size);
+    f.read(&s.name[0],name_size);
+
+    f.read(reinterpret_cast<char*>(&s.telephone),sizeof(s.telephone));
+    f.read(reinterpret_cast<char*>(&s.age),sizeof(s.age));
+    f.read(reinterpret_cast<char*>(&s.date),sizeof(s.date));
+
+    if(!f)return std::nullopt;
+    return s;
+    
+}
+
 bool StudentManager::loadIndex()
 {
     indexes.clear();
@@ -82,5 +111,5 @@ bool StudentManager::insertIndexOrdered(index new_index)
 
     indexes.push_back(new_index);
     saveIndex();
-    return  false;;
+    return  false;
 }
