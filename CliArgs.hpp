@@ -1,36 +1,28 @@
 #pragma once
 
-#include <string>
 #include <optional>
+#include <string>
 
-enum class CliCommand{
+enum class CliCommand {
     InsertStudent,
     DeleteStudent,
     SearchStudent,
     UpdateInfo,
 };
 
-class CliArgs{
-    public:
+class CliArgs {
+public:
+    CliArgs(int argc, char* argv[]);
 
-    CliArgs(int Argc, char* argc[]);
-
-    std::optional<CliCommand> cliCommand(){
-        return cli_command;
-    }
-
-    std::string filePath(){
-        return filename_;
-    }
+    std::optional<CliCommand> cliCommand() const;
+    std::string filePath() const;
+    std::optional<std::string> account() const;
 
     void printUsage();
-    
 
-    private:
-
+private:
     void parse(int argc, char* argv[]);
 
-    std::string index_;
     std::string filename_;
     std::string program;
     std::optional<CliCommand> cli_command;
