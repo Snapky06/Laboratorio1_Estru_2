@@ -1,5 +1,29 @@
 #include "StudentManager.hpp"
 #include <cstring>
+
+bool StudentManager::open()
+{
+    std::fstream f(filename_,std::ios::binary|std::ios::in|std::ios::out);
+    if(!f.is_open()){
+        f.open(filename_,std::ios::binary | std::ios::out);
+        if(!f.is_open())return false;
+        f.close();
+        f.open(filename_,std::ios::binary|std::ios::out|std::ios::in);
+    }
+
+    if(!f.is_open())return false;
+    return loadIndex;
+    return false;
+}
+
+void StudentManager::close()
+{
+    std::ofstream f(filename_,std::ios::binary);
+    saveIndex();
+    
+    if(f.is_open())f.close();
+}
+
 bool StudentManager::addRegister(std::string file)
 {
     
@@ -30,8 +54,8 @@ std::optional<Student> StudentManager::searchStudent(std::string account)
     f.read(reinterpret_cast<char*>(&s.date),sizeof(s.date));
 
     if(!f)return std::nullopt;
+    f.close();
     return s;
-    
 }
 
 bool StudentManager::loadIndex()
@@ -54,7 +78,7 @@ bool StudentManager::loadIndex()
     }
 
     if(f.gcount() == 0)return true;
-
+    f.close();
     return false;
 }
 
@@ -69,7 +93,8 @@ bool StudentManager::saveIndex()
         if(!f)return false;
     }
 
-return !f.fail();
+    f.close();
+    return !f.fail();
 }
 
 int StudentManager::findIndexPosition(std::string account)

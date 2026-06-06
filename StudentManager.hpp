@@ -20,7 +20,6 @@ public:
     bool updateStudent(std::string file);
 
 private:
-    std::fstream in_out;
     std::string filename_;
     std::string index_;
     std::vector<index> indexes;
