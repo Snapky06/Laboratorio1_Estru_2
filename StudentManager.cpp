@@ -1,5 +1,6 @@
 #include "StudentManager.hpp"
 #include <cstring>
+#include <iostream>
 
 StudentManager::StudentManager(std::string filename, std::string index)
 {
@@ -33,8 +34,18 @@ bool StudentManager::addRegister(std::string& JSON)
     if(!json_f.is_open())return false;
 
     nl::json j;
+    Student s;
+
+    try
+    {
     json_f >> j;
-    Student s = j.get<Student>();
+    s = j.get<Student>();
+    }
+    catch (const std::exception& e)
+    {
+    std::cerr << "Invalid student JSON: " << e.what() << "\n";
+    return false;
+    }
 
     std::string account(s.account,sizeof(s.account));
     if(findIndexPosition(account)!=-1)return false;
@@ -155,9 +166,19 @@ bool StudentManager::updateStudent(std::string& JSON)
     }
 
     nl::json j;
-    json_f >> j;
+    Student s;
 
-    Student s = j.get<Student>();
+    try
+    {
+    json_f >> j;
+    s = j.get<Student>();
+    }
+    catch (const std::exception& e)
+    {
+    std::cerr << "Invalid student JSON: " << e.what() << "\n";
+    return false;
+    }
+
     std::string account(s.account, sizeof(s.account));
 
     int pos = findIndexPosition(account);

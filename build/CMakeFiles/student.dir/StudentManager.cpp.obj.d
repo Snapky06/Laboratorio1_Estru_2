@@ -2,26 +2,30 @@ CMakeFiles/student.dir/StudentManager.cpp.obj: \
  C:\Users\saidn\OneDrive\Escritorio\Github\Laboratorio_1_Estru_2\Laboratorio1_Estru_2\StudentManager.cpp \
  C:\Users\saidn\OneDrive\Escritorio\Github\Laboratorio_1_Estru_2\Laboratorio1_Estru_2\StudentManager.hpp \
  C:\Users\saidn\OneDrive\Escritorio\Github\Laboratorio_1_Estru_2\Laboratorio1_Estru_2\Records.hpp \
- C:/msys64/mingw64/include/c++/15.2.0/string \
- C:/msys64/mingw64/include/c++/15.2.0/bits/requires_hosted.h \
+ C:/msys64/mingw64/include/c++/15.2.0/cstring \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/version.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/os_defines.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/cpu_defines.h \
  C:/msys64/mingw64/include/c++/15.2.0/pstl/pstl_config.h \
+ C:/msys64/mingw64/include/string.h C:/msys64/mingw64/include/crtdefs.h \
+ C:/msys64/mingw64/include/corecrt.h C:/msys64/mingw64/include/_mingw.h \
+ C:/msys64/mingw64/include/_mingw_mac.h \
+ C:/msys64/mingw64/include/_mingw_secapi.h \
+ C:/msys64/mingw64/include/vadefs.h \
+ C:/msys64/mingw64/include/sec_api/string_s.h \
+ C:/msys64/mingw64/include/c++/15.2.0/string \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/requires_hosted.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/stringfwd.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/memoryfwd.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/char_traits.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/postypes.h \
  C:/msys64/mingw64/include/c++/15.2.0/cwchar \
- C:/msys64/mingw64/include/wchar.h C:/msys64/mingw64/include/corecrt.h \
- C:/msys64/mingw64/include/_mingw.h \
- C:/msys64/mingw64/include/_mingw_mac.h \
- C:/msys64/mingw64/include/_mingw_secapi.h \
- C:/msys64/mingw64/include/vadefs.h \
+ C:/msys64/mingw64/include/wchar.h \
  C:/msys64/mingw64/include/corecrt_stdio_config.h \
  C:/msys64/mingw64/include/corecrt_wconio.h \
  C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stddef.h \
- C:/msys64/mingw64/include/stddef.h C:/msys64/mingw64/include/crtdefs.h \
+ C:/msys64/mingw64/include/stddef.h \
  C:/msys64/mingw64/include/sec_api/wconio_s.h \
  C:/msys64/mingw64/include/corecrt_wstdlib.h \
  C:/msys64/mingw64/include/corecrt_wctype.h \
@@ -30,7 +34,6 @@ CMakeFiles/student.dir/StudentManager.cpp.obj: \
  C:/msys64/mingw64/include/swprintf.inl \
  C:/msys64/mingw64/include/sec_api/wchar_s.h \
  C:/msys64/mingw64/include/c++/15.2.0/type_traits \
- C:/msys64/mingw64/include/c++/15.2.0/bits/version.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/allocator.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++allocator.h \
  C:/msys64/mingw64/include/c++/15.2.0/bits/new_allocator.h \
@@ -231,9 +234,6 @@ CMakeFiles/student.dir/StudentManager.cpp.obj: \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/meta/call_std/end.hpp \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/json_fwd.hpp \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/string_concat.hpp \
- C:/msys64/mingw64/include/c++/15.2.0/cstring \
- C:/msys64/mingw64/include/string.h \
- C:/msys64/mingw64/include/sec_api/string_s.h \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/meta/identity_tag.hpp \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/meta/std_fs.hpp \
  C:/msys64/mingw64/include/c++/15.2.0/filesystem \

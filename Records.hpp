@@ -34,17 +34,49 @@ inline void to_json(nl::json& j, const Student& s)
 
 inline void from_json(const nl::json& j, Student& s)
 {
+    if (!j.contains("account") || !j.contains("name") || !j.contains("telephone") ||
+        !j.contains("age") || !j.contains("date"))
+    {
+        throw std::runtime_error("Missing required student field");
+    }
+
     std::string account = j.at("account").get<std::string>();
+    std::string name = j.at("name").get<std::string>();
     std::string telephone = j.at("telephone").get<std::string>();
+    int age = j.at("age").get<int>();
     std::string date = j.at("date").get<std::string>();
 
-    memcpy(s.account, account.c_str(), sizeof(s.account));
-    s.name = j.at("name").get<std::string>();
-    memcpy(s.telephone, telephone.c_str(), sizeof(s.telephone));
-    s.age = j.at("age").get<int>();
-    memcpy(s.date, date.c_str(), sizeof(s.date));
-}
+    if (account.size() != sizeof(s.account))
+    {
+        throw std::runtime_error("Account must have exactly 10 characters");
+    }
 
+    if (telephone.size() != sizeof(s.telephone))
+    {
+        throw std::runtime_error("Telephone must have exactly 12 characters");
+    }
+
+    if (date.size() != sizeof(s.date))
+    {
+        throw std::runtime_error("Date must have exactly 8 characters");
+    }
+
+    if (name.empty())
+    {
+        throw std::runtime_error("Name cannot be empty");
+    }
+
+    if (age < 0)
+    {
+        throw std::runtime_error("Age cannot be negative");
+    }
+
+    std::memcpy(s.account, account.c_str(), sizeof(s.account));
+    s.name = name;
+    std::memcpy(s.telephone, telephone.c_str(), sizeof(s.telephone));
+    s.age = age;
+    std::memcpy(s.date, date.c_str(), sizeof(s.date));
+}
 /*
 Linea De Comando
 -Agregar Registros (JSON)

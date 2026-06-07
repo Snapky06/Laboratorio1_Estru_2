@@ -108,6 +108,9 @@ CMakeFiles/student.dir/main.cpp.obj: \
  C:/msys64/mingw64/include/c++/15.2.0/tuple \
  C:\Users\saidn\OneDrive\Escritorio\Github\Laboratorio_1_Estru_2\Laboratorio1_Estru_2\StudentManager.hpp \
  C:\Users\saidn\OneDrive\Escritorio\Github\Laboratorio_1_Estru_2\Laboratorio1_Estru_2\Records.hpp \
+ C:/msys64/mingw64/include/c++/15.2.0/cstring \
+ C:/msys64/mingw64/include/string.h \
+ C:/msys64/mingw64/include/sec_api/string_s.h \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/json.hpp \
  C:/msys64/mingw64/include/c++/15.2.0/algorithm \
  C:/msys64/mingw64/include/c++/15.2.0/bits/stl_algo.h \
@@ -233,9 +236,6 @@ CMakeFiles/student.dir/main.cpp.obj: \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/meta/call_std/end.hpp \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/json_fwd.hpp \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/string_concat.hpp \
- C:/msys64/mingw64/include/c++/15.2.0/cstring \
- C:/msys64/mingw64/include/string.h \
- C:/msys64/mingw64/include/sec_api/string_s.h \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/meta/identity_tag.hpp \
  C:/Users/saidn/OneDrive/Escritorio/Github/Laboratorio_1_Estru_2/Laboratorio1_Estru_2/json-develop/include/nlohmann/detail/meta/std_fs.hpp \
  C:/msys64/mingw64/include/c++/15.2.0/filesystem \
