@@ -70,6 +70,55 @@ bool StudentManager::addRegister(std::string& JSON)
     return saveIndex;
 }
 
+bool StudentManager::deleteStudent(std::string account)
+{
+    int pos = findIndexPosition(account);
+    if(pos == -1)return false;
+
+    long deleted_offset = indexes[pos].offset;
+    int deleted_size = indexes[pos].size;
+
+    std::ifstream f(filename_,std::ios::binary);
+    if(!f.is_open())return false;
+
+    f.seekg(0,std::ios::end);
+    long file_size = static_cast<long>(f.tellg());
+    f.seekg(0,std::ios::beg);
+
+    std::vector<char> data(file_size);
+    f.read(data.data(),file_size);
+    f.close();
+
+     if (deleted_offset < 0 || deleted_size < 0 || deleted_offset + deleted_size > file_size)
+    {
+        return false;
+    }
+
+    data.erase(
+        data.begin() + deleted_offset,
+        data.begin() + deleted_offset + deleted_size
+    );
+
+    std::ofstream f_out(filename_,std::ios::binary | std::ios::trunc);
+    if(!f_out.is_open())return false;
+
+    f_out.write(data.data(),data.size());
+    f_out.close();
+
+    if(!f_out)return false;
+
+    indexes.erase(indexes.begin() + pos);
+    for(int i  = 0 ; i < indexes.size() ; i++){
+
+        if (indexes[i].offset > deleted_offset)
+        {
+            indexes[i].offset -= deleted_size;
+        }
+    }
+    
+    return saveIndex;
+}
+
 std::optional<Student> StudentManager::searchStudent(std::string& account)
 {
     std::ifstream f(filename_,std::ios::binary);
@@ -179,5 +228,5 @@ bool StudentManager::insertIndexOrdered(index new_index)
     }
 
     indexes.push_back(new_index);
-    return  false;
+    return  true;;
 }
