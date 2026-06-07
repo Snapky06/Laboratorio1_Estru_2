@@ -280,20 +280,27 @@ bool StudentManager::saveIndex()
 int StudentManager::findIndexPosition(std::string account)
 {
     int left = 0;
-    int right = indexes.size() - 1;
+    int right = static_cast<int>(indexes.size()) - 1;
 
-    while(left<=right){
-        int mid = left + (right - left)/2;
-        int cmp = strcmp(indexes[mid].account,account.c_str());
+    while (left <= right)
+    {
+        int mid = left + (right - left) / 2;
+        int cmp = memcmp(indexes[mid].account, account.c_str(), sizeof(indexes[mid].account));
 
-        if(cmp == 0){
+        if (cmp == 0)
+        {
             return mid;
-        }else if(cmp < 0){
+        }
+        else if (cmp < 0)
+        {
             left = mid + 1;
-        }else{
+        }
+        else
+        {
             right = mid - 1;
         }
     }
+
     return -1;
 }
 
