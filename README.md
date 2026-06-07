@@ -6,6 +6,7 @@ JSON files are only used as input for adding or updating students.
 ==============================================================
 ## Compile
 
+cd Laboratorio1_Estru_2
 cmake -S . -B build
 cmake --build build
 
@@ -21,9 +22,9 @@ Executable:
 .\build\student.exe --file <data_file.dat> [--index <index_file.idx>] delete <account>
 .\build\student.exe --file <data_file.dat> [--index <index_file.idx>] update --student <student.json>
 ```
-
-If `--index` is omitted, the index name is generated from the data file:
 ==============================================================
+If `--index` is omitted, the index name is generated from the data file:
+
 ```text
 students.dat -> students.idx
 ```
