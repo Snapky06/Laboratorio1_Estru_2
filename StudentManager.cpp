@@ -31,12 +31,46 @@ void StudentManager::close()
     if(f.is_open())f.close();
 }
 
-bool StudentManager::addRegister(std::string file)
+bool StudentManager::addRegister(std::string& JSON)
 {
-    
+    std::ifstream json_f(JSON);
+    if(!json_f.is_open())return false;
+
+    nl::json j;
+    json_f >> j;
+    Student s = j.get<Student>();
+
+    std::string account(s.account,sizeof(s.account));
+    if(findIndexPosition(s.account)!=-1)return false;
+
+    std::ofstream f(filename_,std::ios::binary|std::ios::app);
+    if(!f.is_open())return false;
+
+    f.seekp(0,std::ios::end);
+    long offset = static_cast<long>(f.tellp());
+    int name_size = static_cast<int>(s.name.size());
+
+    int record_size = sizeof(s.account) + name_size
+                    + sizeof(s.telephone) + sizeof(s.age) + sizeof(s.date);
+
+    f.write(reinterpret_cast<char*>(&s.account),sizeof(s.account));
+    f.write(reinterpret_cast<char*>(&s.telephone),sizeof(s.telephone));
+    f.write(reinterpret_cast<char*>(&s.name),sizeof(name_size));
+    f.write(reinterpret_cast<char*>(&s.age),sizeof(s.age));
+    f.write(reinterpret_cast<char*>(&s.date),sizeof(s.date));
+
+    f.close();
+
+    index new_index;
+    memcpy(new_index.account,s.account,sizeof(s.account));
+    new_index.offset = offset;
+    new_index.size = record_size;
+    if(!insertIndexOrdered(new_index))return false;
+
+    return saveIndex;
 }
 
-std::optional<Student> StudentManager::searchStudent(std::string account)
+std::optional<Student> StudentManager::searchStudent(std::string& account)
 {
     std::ifstream f(filename_,std::ios::binary);
     if(!f.is_open())return std::nullopt;
@@ -63,6 +97,12 @@ std::optional<Student> StudentManager::searchStudent(std::string account)
     if(!f)return std::nullopt;
     f.close();
     return s;
+}
+
+bool StudentManager::updateStudent(std::string& JSON)
+{
+
+    return false;
 }
 
 bool StudentManager::loadIndex()

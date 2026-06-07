@@ -14,10 +14,10 @@ public:
     bool open();
     void close();
 
-    bool addRegister(std::string file);
+    bool addRegister(std::string& JSON);
     bool deleteStudent(std::string account);
-    std::optional<Student> searchStudent(std::string account);
-    bool updateStudent(std::string file);
+    std::optional<Student> searchStudent(std::string& account);
+    bool updateStudent(std::string& JSON);
 
 private:
     std::string filename_;
