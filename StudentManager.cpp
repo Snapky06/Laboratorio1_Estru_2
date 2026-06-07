@@ -18,7 +18,7 @@ bool StudentManager::open()
     }
 
     if(!f.is_open())return false;
-    return loadIndex;
+    return loadIndex();
     return false;
 }
 
@@ -66,7 +66,7 @@ bool StudentManager::addRegister(std::string& JSON)
     new_index.size = record_size;
     if(!insertIndexOrdered(new_index))return false;
 
-    return saveIndex;
+    return saveIndex();
 }
 
 bool StudentManager::deleteStudent(std::string account)
@@ -115,7 +115,7 @@ bool StudentManager::deleteStudent(std::string account)
         }
     }
 
-    return saveIndex;
+    return saveIndex();
 }
 
 std::optional<Student> StudentManager::searchStudent(std::string& account)
@@ -160,7 +160,6 @@ bool StudentManager::updateStudent(std::string& JSON)
     json_f >> j;
 
     Student s = j.get<Student>();
-
     std::string account(s.account, sizeof(s.account));
 
     int pos = findIndexPosition(account);
@@ -172,48 +171,73 @@ bool StudentManager::updateStudent(std::string& JSON)
 
     int name_size = static_cast<int>(s.name.size());
 
-    int new_record_size =
-        sizeof(s.account) +
-        sizeof(name_size) +
-        name_size +
-        sizeof(s.telephone) +
-        sizeof(s.age) +
-        sizeof(s.date);
+    std::string new_record;
+    new_record.append(s.account, sizeof(s.account));
+    new_record.append(reinterpret_cast<char*>(&name_size), sizeof(name_size));
+    new_record.append(s.name.c_str(), name_size);
+    new_record.append(s.telephone, sizeof(s.telephone));
+    new_record.append(reinterpret_cast<char*>(&s.age), sizeof(s.age));
+    new_record.append(s.date, sizeof(s.date));
 
-    if (new_record_size != indexes[pos].size)
-    {
-        return false;
-    }
+    long old_offset = indexes[pos].offset;
+    int old_size = indexes[pos].size;
+    int new_size = static_cast<int>(new_record.size());
+    int difference = new_size - old_size;
 
-    std::fstream f(filename_, std::ios::binary | std::ios::in | std::ios::out);
+    std::ifstream f(filename_, std::ios::binary);
 
     if (!f.is_open())
     {
         return false;
     }
 
-    f.seekp(indexes[pos].offset, std::ios::beg);
+    f.seekg(0, std::ios::end);
+    long file_size = static_cast<long>(f.tellg());
+    f.seekg(0, std::ios::beg);
 
-    if (!f)
+    if (old_offset < 0 || old_size < 0 || old_offset + old_size > file_size)
     {
         return false;
     }
 
-    f.write(s.account, sizeof(s.account));
-    f.write(reinterpret_cast<char*>(&name_size), sizeof(name_size));
-    f.write(s.name.c_str(), name_size);
-    f.write(s.telephone, sizeof(s.telephone));
-    f.write(reinterpret_cast<char*>(&s.age), sizeof(s.age));
-    f.write(s.date, sizeof(s.date));
-
-    if (!f)
-    {
-        return false;
-    }
-
+    std::vector<char> data(file_size);
+    f.read(data.data(), file_size);
     f.close();
 
-    return !f.fail();
+    if (!f)
+    {
+        return false;
+    }
+
+    data.erase(data.begin() + old_offset, data.begin() + old_offset + old_size);
+    data.insert(data.begin() + old_offset, new_record.begin(), new_record.end());
+
+    std::ofstream out(filename_, std::ios::binary | std::ios::trunc);
+
+    if (!out.is_open())
+    {
+        return false;
+    }
+
+    out.write(data.data(), data.size());
+    out.close();
+
+    if (!out)
+    {
+        return false;
+    }
+
+    indexes[pos].size = new_size;
+
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        if (indexes[i].offset > old_offset)
+        {
+            indexes[i].offset += difference;
+        }
+    }
+
+    return saveIndex();
 }
 
 bool StudentManager::loadIndex()
@@ -290,5 +314,5 @@ bool StudentManager::insertIndexOrdered(index new_index)
     }
 
     indexes.push_back(new_index);
-    return  true;;
+    return  true;
 }

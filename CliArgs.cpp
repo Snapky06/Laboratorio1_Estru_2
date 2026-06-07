@@ -36,10 +36,10 @@ void CliArgs::printUsage() const
 {
     std::cout
         << "Usage:\n"
-        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] add --student <json_file>\n"
-        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] delete <account>\n"
-        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] search <account>\n"
-        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] update --student <json_file>\n";
+        << "  " << program << " --file <name> [--index <name>] add --student <json_name>\n"
+        << "  " << program << " --file <name> [--index <name>] search <account>\n"
+        << "  " << program << " --file <name> [--index <name>] delete <account>\n"
+        << "  " << program << " --file <name> [--index <name>] update --student <json_name>\n\n";
 }
 
 void CliArgs::parse(int argc, char* argv[])
@@ -50,16 +50,34 @@ void CliArgs::parse(int argc, char* argv[])
     {
         std::string arg = argv[i];
 
-        if (arg == "--file" && i + 1 < argc)
+        if (arg == "--file")
         {
+            if (i + 1 >= argc)
+            {
+                std::cerr << "--file requires a name\n";
+                return;
+            }
+
             filename_ = argv[++i];
         }
-        else if (arg == "--index" && i + 1 < argc)
+        else if (arg == "--index")
         {
+            if (i + 1 >= argc)
+            {
+                std::cerr << "--index requires a name\n";
+                return;
+            }
+
             index_ = argv[++i];
         }
-        else if (arg == "--student" && i + 1 < argc)
+        else if (arg == "--student")
         {
+            if (i + 1 >= argc)
+            {
+                std::cerr << "--student requires a JSON name\n";
+                return;
+            }
+
             student_file_ = argv[++i];
         }
         else if (arg == "add")
@@ -70,13 +88,27 @@ void CliArgs::parse(int argc, char* argv[])
         {
             cli_command = CliCommand::UpdateInfo;
         }
-        else if (arg == "search" && i + 1 < argc)
+        else if (arg == "search")
         {
+            if (i + 1 >= argc)
+            {
+                std::cerr << "search requires an account\n";
+                cli_command = std::nullopt;
+                return;
+            }
+
             cli_command = CliCommand::SearchStudent;
             account_ = argv[++i];
         }
-        else if (arg == "delete" && i + 1 < argc)
+        else if (arg == "delete")
         {
+            if (i + 1 >= argc)
+            {
+                std::cerr << "delete requires an account\n";
+                cli_command = std::nullopt;
+                return;
+            }
+
             cli_command = CliCommand::DeleteStudent;
             account_ = argv[++i];
         }
@@ -98,15 +130,24 @@ void CliArgs::parse(int argc, char* argv[])
     if (index_.empty())
     {
         index_ = filename_;
+    }
 
-        size_t dot = index_.find_last_of('.');
+    if (filename_.size() < 4 || filename_.substr(filename_.size() - 4) != ".dat")
+    {
+        filename_ += ".dat";
+    }
 
-        if (dot != std::string::npos)
-        {
-            index_ = index_.substr(0, dot);
-        }
-
+    if (index_.size() < 4 || index_.substr(index_.size() - 4) != ".idx")
+    {
         index_ += ".idx";
+    }
+
+    if (student_file_.has_value())
+    {
+        if (student_file_->size() < 5 || student_file_->substr(student_file_->size() - 5) != ".json")
+        {
+            *student_file_ += ".json";
+        }
     }
 
     if (!cli_command.has_value())
@@ -117,7 +158,7 @@ void CliArgs::parse(int argc, char* argv[])
     if ((*cli_command == CliCommand::InsertStudent || *cli_command == CliCommand::UpdateInfo)
         && !student_file_.has_value())
     {
-        std::cerr << "--student is required for adding and updating\n";
+        std::cerr << "--student is required for add and update\n";
         cli_command = std::nullopt;
     }
 }
