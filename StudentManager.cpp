@@ -46,8 +46,8 @@ bool StudentManager::addRegister(std::string& JSON)
     long offset = static_cast<long>(f.tellp());
     int name_size = static_cast<int>(s.name.size());
 
-    int record_size = sizeof(s.account) + name_size
-                    + sizeof(s.telephone) + sizeof(s.age) + sizeof(s.date);
+    int record_size = sizeof(s.account) + sizeof(name_size)
+    + name_size + sizeof(s.telephone) + sizeof(s.age) + sizeof(s.date);
 
     f.write(s.account, sizeof(s.account));
     f.write(reinterpret_cast<char*>(&name_size), sizeof(name_size));
@@ -308,7 +308,7 @@ bool StudentManager::insertIndexOrdered(index new_index)
 {
     for(int i = 0;i< indexes.size(); i++){
 
-        int cmp = strcmp(indexes[i].account,new_index.account);
+        int cmp = memcmp(indexes[i].account, new_index.account, sizeof(new_index.account));
         
         if(cmp == 0)return false;
 
