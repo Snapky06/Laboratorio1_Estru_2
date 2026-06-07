@@ -35,11 +35,11 @@ std::optional<std::string> CliArgs::studentFile() const
 void CliArgs::printUsage() const
 {
     std::cout
-        << "Usage:\n"
-        << "  " << program << " --file <name> [--index <name>] add --student <json_name>\n"
-        << "  " << program << " --file <name> [--index <name>] search <account>\n"
-        << "  " << program << " --file <name> [--index <name>] delete <account>\n"
-        << "  " << program << " --file <name> [--index <name>] update --student <json_name>\n\n";
+        << "Usage: "<< program << "\n"
+        << " --file <name> [--index <name>] add --student <json_name>\n"
+        << " --file <name> [--index <name>] search <account>\n"
+        << " --file <name> [--index <name>] delete <account>\n"
+        << " --file <name> [--index <name>] update --student <json_name>\n\n";
 }
 
 void CliArgs::parse(int argc, char* argv[])
