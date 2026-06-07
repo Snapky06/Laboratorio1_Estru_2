@@ -5,7 +5,6 @@ StudentManager::StudentManager(std::string filename, std::string index)
 {
     filename_ = filename;
     index_ = index;
-    open();
 }
 
 bool StudentManager::open()
@@ -115,7 +114,7 @@ bool StudentManager::deleteStudent(std::string account)
             indexes[i].offset -= deleted_size;
         }
     }
-    
+
     return saveIndex;
 }
 
@@ -150,8 +149,71 @@ std::optional<Student> StudentManager::searchStudent(std::string& account)
 
 bool StudentManager::updateStudent(std::string& JSON)
 {
+    std::ifstream json_f(JSON);
 
-    return false;
+    if (!json_f.is_open())
+    {
+        return false;
+    }
+
+    nl::json j;
+    json_f >> j;
+
+    Student s = j.get<Student>();
+
+    std::string account(s.account, sizeof(s.account));
+
+    int pos = findIndexPosition(account);
+
+    if (pos == -1)
+    {
+        return false;
+    }
+
+    int name_size = static_cast<int>(s.name.size());
+
+    int new_record_size =
+        sizeof(s.account) +
+        sizeof(name_size) +
+        name_size +
+        sizeof(s.telephone) +
+        sizeof(s.age) +
+        sizeof(s.date);
+
+    if (new_record_size != indexes[pos].size)
+    {
+        return false;
+    }
+
+    std::fstream f(filename_, std::ios::binary | std::ios::in | std::ios::out);
+
+    if (!f.is_open())
+    {
+        return false;
+    }
+
+    f.seekp(indexes[pos].offset, std::ios::beg);
+
+    if (!f)
+    {
+        return false;
+    }
+
+    f.write(s.account, sizeof(s.account));
+    f.write(reinterpret_cast<char*>(&name_size), sizeof(name_size));
+    f.write(s.name.c_str(), name_size);
+    f.write(s.telephone, sizeof(s.telephone));
+    f.write(reinterpret_cast<char*>(&s.age), sizeof(s.age));
+    f.write(s.date, sizeof(s.date));
+
+    if (!f)
+    {
+        return false;
+    }
+
+    f.close();
+
+    return !f.fail();
 }
 
 bool StudentManager::loadIndex()

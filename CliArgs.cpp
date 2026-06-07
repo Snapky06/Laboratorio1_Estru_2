@@ -1,53 +1,123 @@
 #include "CliArgs.hpp"
+
 #include <iostream>
 
-CliArgs::CliArgs(int argc, char* argv[]) {
+CliArgs::CliArgs(int argc, char* argv[])
+{
     parse(argc, argv);
 }
 
-std::optional<CliCommand> CliArgs::cliCommand() const {
+std::optional<CliCommand> CliArgs::cliCommand() const
+{
     return cli_command;
 }
 
-std::string CliArgs::filePath() const {
+std::string CliArgs::filePath() const
+{
     return filename_;
 }
 
-std::optional<std::string> CliArgs::account() const {
+std::string CliArgs::indexPath() const
+{
+    return index_;
+}
+
+std::optional<std::string> CliArgs::account() const
+{
     return account_;
 }
 
-void CliArgs::printUsage() {
-    std::cout << "\nUsage: " << program
-              << "\n agregar <archivo_json> \n"
-              << " eliminar <no_cuenta>\n"
-              << " buscar <no_cuenta>\n"
-              << program << " actualizar <archivo_json>\n";
+std::optional<std::string> CliArgs::studentFile() const
+{
+    return student_file_;
 }
 
-void CliArgs::parse(int argc, char* argv[]) {
+void CliArgs::printUsage() const
+{
+    std::cout
+        << "Usage:\n"
+        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] add --student <json_file>\n"
+        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] delete <account>\n"
+        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] search <account>\n"
+        << "  " << program << " --file <filename.dat> [--index <indexname.idx>] update --student <json_file>\n";
+}
+
+void CliArgs::parse(int argc, char* argv[])
+{
     program = argv[0];
 
-    if (argc < 3) {
+    for (int i = 1; i < argc; i++)
+    {
+        std::string arg = argv[i];
+
+        if (arg == "--file" && i + 1 < argc)
+        {
+            filename_ = argv[++i];
+        }
+        else if (arg == "--index" && i + 1 < argc)
+        {
+            index_ = argv[++i];
+        }
+        else if (arg == "--student" && i + 1 < argc)
+        {
+            student_file_ = argv[++i];
+        }
+        else if (arg == "add")
+        {
+            cli_command = CliCommand::InsertStudent;
+        }
+        else if (arg == "update")
+        {
+            cli_command = CliCommand::UpdateInfo;
+        }
+        else if (arg == "search" && i + 1 < argc)
+        {
+            cli_command = CliCommand::SearchStudent;
+            account_ = argv[++i];
+        }
+        else if (arg == "delete" && i + 1 < argc)
+        {
+            cli_command = CliCommand::DeleteStudent;
+            account_ = argv[++i];
+        }
+        else
+        {
+            std::cerr << "Invalid argument: " << arg << "\n";
+            cli_command = std::nullopt;
+            return;
+        }
+    }
+
+    if (filename_.empty())
+    {
+        std::cerr << "--file is required\n";
+        cli_command = std::nullopt;
         return;
     }
 
-    std::string command = argv[1];
-    std::string value = argv[2];
+    if (index_.empty())
+    {
+        index_ = filename_;
 
-    if (command == "agregar") {
-        cli_command = CliCommand::InsertStudent;
-        filename_ = value;
-    } else if (command == "eliminar") {
-        cli_command = CliCommand::DeleteStudent;
-        account_ = value;
-    } else if (command == "buscar") {
-        cli_command = CliCommand::SearchStudent;
-        account_ = value;
-    } else if (command == "actualizar") {
-        cli_command = CliCommand::UpdateInfo;
-        filename_ = value;
-    } else {
-        std::cerr << "Unknown command: " << command << "\n";
+        size_t dot = index_.find_last_of('.');
+
+        if (dot != std::string::npos)
+        {
+            index_ = index_.substr(0, dot);
+        }
+
+        index_ += ".idx";
+    }
+
+    if (!cli_command.has_value())
+    {
+        return;
+    }
+
+    if ((*cli_command == CliCommand::InsertStudent || *cli_command == CliCommand::UpdateInfo)
+        && !student_file_.has_value())
+    {
+        std::cerr << "--student is required for adding and updating\n";
+        cli_command = std::nullopt;
     }
 }
