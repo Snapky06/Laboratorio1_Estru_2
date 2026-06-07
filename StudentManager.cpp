@@ -24,10 +24,7 @@ bool StudentManager::open()
 
 void StudentManager::close()
 {
-    std::ofstream f(filename_,std::ios::binary);
     saveIndex();
-    
-    if(f.is_open())f.close();
 }
 
 bool StudentManager::addRegister(std::string& JSON)
@@ -40,7 +37,7 @@ bool StudentManager::addRegister(std::string& JSON)
     Student s = j.get<Student>();
 
     std::string account(s.account,sizeof(s.account));
-    if(findIndexPosition(s.account)!=-1)return false;
+    if(findIndexPosition(account)!=-1)return false;
 
     std::ofstream f(filename_,std::ios::binary|std::ios::app);
     if(!f.is_open())return false;
@@ -52,11 +49,12 @@ bool StudentManager::addRegister(std::string& JSON)
     int record_size = sizeof(s.account) + name_size
                     + sizeof(s.telephone) + sizeof(s.age) + sizeof(s.date);
 
-    f.write(reinterpret_cast<char*>(&s.account),sizeof(s.account));
-    f.write(reinterpret_cast<char*>(&s.telephone),sizeof(s.telephone));
-    f.write(reinterpret_cast<char*>(&s.name),sizeof(name_size));
-    f.write(reinterpret_cast<char*>(&s.age),sizeof(s.age));
-    f.write(reinterpret_cast<char*>(&s.date),sizeof(s.date));
+    f.write(s.account, sizeof(s.account));
+    f.write(reinterpret_cast<char*>(&name_size), sizeof(name_size));
+    f.write(s.name.c_str(), name_size);
+    f.write(s.telephone, sizeof(s.telephone));
+    f.write(reinterpret_cast<char*>(&s.age), sizeof(s.age));
+    f.write(s.date, sizeof(s.date));
 
     f.close();
 
@@ -266,7 +264,7 @@ bool StudentManager::loadIndex()
 
 bool StudentManager::saveIndex()
 {
-    std::ofstream f(index_,std::ios::binary);
+    std::ofstream f(index_, std::ios::binary | std::ios::trunc);
 
     if(!f.is_open())return false;
 
@@ -301,7 +299,7 @@ int StudentManager::findIndexPosition(std::string account)
 
 bool StudentManager::insertIndexOrdered(index new_index)
 {
-    for(int i = 0;i< indexes.size() - 1; i++){
+    for(int i = 0;i< indexes.size(); i++){
 
         int cmp = strcmp(indexes[i].account,new_index.account);
         
