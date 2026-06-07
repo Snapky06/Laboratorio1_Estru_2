@@ -1,6 +1,7 @@
 #include "CliArgs.hpp"
 #include "StudentManager.hpp"
 
+#include <exception>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -34,37 +35,63 @@ int main(int argc, char* argv[])
 
     bool ok = false;
 
-    if (*args.cliCommand() == CliCommand::InsertStudent)
+    try
     {
-        std::string json = *args.studentFile();
-        ok = manager.addRegister(json);
-    }
-    else if (*args.cliCommand() == CliCommand::DeleteStudent)
-    {
-        ok = manager.deleteStudent(*args.account());
-    }
-    else if (*args.cliCommand() == CliCommand::SearchStudent)
-    {
-        std::string account = *args.account();
-        std::optional<Student> student = manager.searchStudent(account);
-
-        if (student.has_value())
+        if (*args.cliCommand() == CliCommand::InsertStudent)
         {
-            printStudent(*student);
-            ok = true;
+            std::string json = *args.studentFile();
+            ok = manager.addRegister(json);
+
+            if (!ok)
+            {
+                std::cerr << "Add failed\n";
+            }
+        }
+        else if (*args.cliCommand() == CliCommand::DeleteStudent)
+        {
+            ok = manager.deleteStudent(*args.account());
+
+            if (!ok)
+            {
+                std::cerr << "Delete failed\n";
+            }
+        }
+        else if (*args.cliCommand() == CliCommand::SearchStudent)
+        {
+            std::string account = *args.account();
+            std::optional<Student> student = manager.searchStudent(account);
+
+            if (student.has_value())
+            {
+                printStudent(*student);
+                ok = true;
+            }
+            else
+            {
+                std::cerr << "Search failed\n";
+            }
+        }
+        else if (*args.cliCommand() == CliCommand::UpdateInfo)
+        {
+            std::string json = *args.studentFile();
+            ok = manager.updateStudent(json);
+
+            if (!ok)
+            {
+                std::cerr << "Update failed\n";
+            }
         }
     }
-    else if (*args.cliCommand() == CliCommand::UpdateInfo)
+    catch (const std::exception& e)
     {
-        std::string json = *args.studentFile();
-        ok = manager.updateStudent(json);
+        std::cerr << "Invalid input: " << e.what() << "\n";
+        ok = false;
     }
 
     manager.close();
 
     if (!ok)
     {
-        std::cerr << "Command failed\n";
         return 1;
     }
 

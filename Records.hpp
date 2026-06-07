@@ -2,6 +2,7 @@
 #include <cstring>
 #include <string>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
 
 namespace nl = nlohmann;
 
@@ -77,6 +78,7 @@ inline void from_json(const nl::json& j, Student& s)
     s.age = age;
     std::memcpy(s.date, date.c_str(), sizeof(s.date));
 }
+
 /*
 Linea De Comando
 -Agregar Registros (JSON)
