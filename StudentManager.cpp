@@ -1,6 +1,7 @@
 #include "StudentManager.hpp"
 #include <cstring>
 #include <iostream>
+#include "CRC.h"
 
 StudentManager::StudentManager(std::string filename, std::string index)
 {
@@ -39,21 +40,16 @@ bool StudentManager::addRegister(std::string& JSON)
 
     std::string account(s.account, sizeof(s.account));
     if (findIndexPosition(account) != -1) return false;
+    std::string record = serializeStudent(s);
 
     std::ofstream f(filename_, std::ios::binary | std::ios::app);
     if (!f.is_open()) return false;
 
     f.seekp(0, std::ios::end);
+    
     long offset = static_cast<long>(f.tellp());
-
     int name_size = static_cast<int>(s.name.size());
-
-    int record_size = sizeof(s.account)
-                    + sizeof(name_size)
-                    + name_size
-                    + sizeof(s.telephone)
-                    + sizeof(s.age)
-                    + sizeof(s.date);
+    int record_size = static_cast<int>(record.size());
 
     f.write(s.account, sizeof(s.account));
     f.write(reinterpret_cast<char*>(&name_size), sizeof(name_size));
@@ -315,6 +311,40 @@ bool StudentManager::saveIndex()
 
     f.close();
     return !f.fail();
+}
+
+std::string StudentManager::serializeStudent(Student &s)
+{
+    int name_size = static_cast<int>(s.name.size());
+
+    std::string record;
+
+    record.append(s.account, sizeof(s.account));
+    record.append(reinterpret_cast<char*>(&name_size), sizeof(name_size));
+    record.append(s.name.c_str(), name_size);
+    record.append(s.telephone, sizeof(s.telephone));
+    record.append(reinterpret_cast<char*>(&s.age), sizeof(s.age));
+    record.append(s.date, sizeof(s.date));
+
+    return record;
+}
+
+Student StudentManager::deserializeStudent(std::ifstream &f)
+{
+    Student s;
+    int name_size = 0;
+
+    f.read(s.account, sizeof(s.account));
+    f.read(reinterpret_cast<char*>(&name_size), sizeof(name_size));
+
+    s.name.resize(name_size);
+
+    f.read(&s.name[0], name_size);
+    f.read(s.telephone, sizeof(s.telephone));
+    f.read(reinterpret_cast<char*>(&s.age), sizeof(s.age));
+    f.read(s.date, sizeof(s.date));
+
+    return s;
 }
 
 int StudentManager::findIndexPosition(std::string account)

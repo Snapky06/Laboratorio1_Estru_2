@@ -15,4 +15,5 @@ add_executable(student
 target_include_directories(student PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/json-develop/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/CRCpp-master/inc
 )

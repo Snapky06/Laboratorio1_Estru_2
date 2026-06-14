@@ -20,7 +20,8 @@ struct PageHeader{
 int record_count;
 int used_bytes;
 uint32_t crc;
-}
+};
+
 struct Student
 {
     char account[10]; //Llave primaria

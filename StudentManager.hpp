@@ -27,6 +27,8 @@ private:
     bool loadIndex();
     bool saveIndex();
 
+    std::string serializeStudent(Student& s);
+    Student deserializeStudent(std::ifstream& f);
     int findIndexPosition(std::string account);
     bool insertIndexOrdered(index new_index);
 };
