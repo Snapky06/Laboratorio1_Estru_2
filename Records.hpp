@@ -3,6 +3,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
+#include <cstdint>
 
 namespace nl = nlohmann;
 
@@ -13,6 +14,13 @@ long offset;
 int size;
 };
 
+const int PAGE_SIZE = 512;
+
+struct PageHeader{
+int record_count;
+int used_bytes;
+uint32_t crc;
+}
 struct Student
 {
     char account[10]; //Llave primaria
