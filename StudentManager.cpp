@@ -27,7 +27,7 @@ bool StudentManager::open()
 void StudentManager::close()
 {
     saveIndex();
-}
+}   
 
 bool StudentManager::addRegister(std::string& JSON)
 {
@@ -48,22 +48,12 @@ bool StudentManager::addRegister(std::string& JSON)
     f.seekp(0, std::ios::end);
     
     long offset = static_cast<long>(f.tellp());
-    int name_size = static_cast<int>(s.name.size());
-    int record_size = static_cast<int>(record.size());
-
-    f.write(s.account, sizeof(s.account));
-    f.write(reinterpret_cast<char*>(&name_size), sizeof(name_size));
-    f.write(s.name.c_str(), name_size);
-    f.write(s.telephone, sizeof(s.telephone));
-    f.write(reinterpret_cast<char*>(&s.age), sizeof(s.age));
-    f.write(s.date, sizeof(s.date));
-
     if (!f) return false;
 
     index new_index;
     memcpy(new_index.account, s.account, sizeof(s.account));
     new_index.offset = offset;
-    new_index.size = record_size;
+    new_index.size = static_cast<int>(record.size());
 
     if (!insertIndexOrdered(new_index)) return false;
 
@@ -126,33 +116,9 @@ std::optional<Student> StudentManager::searchStudent(std::string& account)
     if (!f.is_open()) return std::nullopt;
 
     f.seekg(indexes[pos].offset, std::ios::beg);
-    if (!f) return std::nullopt;
-
-    Student s;
-    int name_size = 0;
-
-    f.read(reinterpret_cast<char*>(s.account), sizeof(s.account));
-    f.read(reinterpret_cast<char*>(&name_size), sizeof(name_size));
-
-    int fixed_size = sizeof(s.account)
-                   + sizeof(name_size)
-                   + sizeof(s.telephone)
-                   + sizeof(s.age)
-                   + sizeof(s.date);
-
-    if (name_size < 0 || fixed_size + name_size != indexes[pos].size)
-    {
-        return std::nullopt;
-    }
-
-    s.name.resize(name_size);
-    f.read(&s.name[0], name_size);
-
-    f.read(reinterpret_cast<char*>(s.telephone), sizeof(s.telephone));
-    f.read(reinterpret_cast<char*>(&s.age), sizeof(s.age));
-    f.read(reinterpret_cast<char*>(s.date), sizeof(s.date));
-
-    if (!f) return std::nullopt;
+    
+    Student s = deserializeStudent(f);
+    if(!f)return std::nullopt;
 
     return s;
 }
@@ -190,16 +156,8 @@ bool StudentManager::updateStudent(std::string& JSON)
         std::cerr << "Account not found: " << account << "\n";
         return false;
     }
-
-    int name_size = static_cast<int>(s.name.size());
-
-    std::string new_record;
-    new_record.append(s.account, sizeof(s.account));
-    new_record.append(reinterpret_cast<char*>(&name_size), sizeof(name_size));
-    new_record.append(s.name.c_str(), name_size);
-    new_record.append(s.telephone, sizeof(s.telephone));
-    new_record.append(reinterpret_cast<char*>(&s.age), sizeof(s.age));
-    new_record.append(s.date, sizeof(s.date));
+    
+    std::string new_record = serializeStudent(s);
 
     long old_offset = indexes[pos].offset;
     int old_size = indexes[pos].size;
