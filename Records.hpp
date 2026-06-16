@@ -16,7 +16,7 @@ int size;
 
 const int PAGE_SIZE = 512;
 
-struct PageHeader{
+struct pageHeader{
 int record_count;
 int used_bytes;
 uint32_t crc;

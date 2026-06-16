@@ -31,32 +31,84 @@ void StudentManager::close()
 
 bool StudentManager::addRegister(std::string& JSON)
 {
-    std::ifstream json_f(JSON);
-    if (!json_f.is_open()) return false;
+    std::ifstream json(JSON);
+    if(!json.is_open())return false;
 
     nl::json j;
-    json_f >> j;
+    json >> j;
+
     Student s = j.get<Student>();
+    json.close();
 
-    std::string account(s.account, sizeof(s.account));
-    if (findIndexPosition(account) != -1) return false;
+    std::string account(s.account,sizeof(s.account));
+    if(findIndexPosition(account)!=-1)return false;
+
     std::string record = serializeStudent(s);
+    int record_size = static_cast<int>(record.size());
+    int page_data_size = PAGE_SIZE-sizeof(pageHeader);
 
-    std::ofstream f(filename_, std::ios::binary | std::ios::app);
-    if (!f.is_open()) return false;
+    if(record_size > page_data_size)return false;
 
-    f.seekp(0, std::ios::end);
-    long offset = static_cast<long>(f.tellp());
-    f.write(record.data(),record.size());
-    if (!f) return false;
-    f.close();
+    std::fstream f(filename_,std::ios::binary|std::ios::in|std::ios::out);
+    if(!f.is_open())return false;
+
+    f.seekg(0,std::ios::end);
+    long file_size = static_cast<long>(f.tellg());
+
+    if(file_size < 0)return false;
+
+    if(file_size % PAGE_SIZE!=0)return false;
+
+    char page[PAGE_SIZE] = {};
+    pageHeader header = {};
+    long page_start = 0;
+
+    if (file_size == 0){
+        page_start = 0;
+    }else{
+        page_start = file_size - PAGE_SIZE;
+
+        f.seekg(page_start,std::ios::beg);
+        f.read(page,PAGE_SIZE);
+
+        if(!f)return false;
+
+        memcpy(&header, page, sizeof(header));
+
+        if(header.used_bytes + record_size > page_data_size){
+            memset(page,0,PAGE_SIZE);
+            header = {};
+            page_start = file_size;
+        }
+    }
+
+    long offset = page_start + sizeof(pageHeader) + header.used_bytes;
+
+    memcpy(page + sizeof(pageHeader) + header.used_bytes,
+            record.data(),
+            record.size());
+
+    header.record_count ++;
+    header.used_bytes +=record.size();
+
+    header.crc =  CRC::Calculate(page+ sizeof(pageHeader),
+                                header.used_bytes,
+                                CRC::CRC_32());
+
+    memcpy(page, &header , sizeof(header));
+
+    f.clear();
+    f.seekp(page_start,std::ios::beg);
+    f.write(page,PAGE_SIZE);
+
+    if(!f)return false;
 
     index new_index;
-    memcpy(new_index.account, s.account, sizeof(s.account));
+    memcpy(new_index.account,s.account,sizeof(s.account));
     new_index.offset = offset;
-    new_index.size = static_cast<int>(record.size());
+    new_index.size = record_size;
 
-    if (!insertIndexOrdered(new_index)) return false;
+    if(!insertIndexOrdered(new_index))return false;
 
     return saveIndex();
 }
