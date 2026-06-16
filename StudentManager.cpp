@@ -46,9 +46,10 @@ bool StudentManager::addRegister(std::string& JSON)
     if (!f.is_open()) return false;
 
     f.seekp(0, std::ios::end);
-    
     long offset = static_cast<long>(f.tellp());
+    f.write(record.data(),record.size());
     if (!f) return false;
+    f.close();
 
     index new_index;
     memcpy(new_index.account, s.account, sizeof(s.account));
@@ -156,7 +157,7 @@ bool StudentManager::updateStudent(std::string& JSON)
         std::cerr << "Account not found: " << account << "\n";
         return false;
     }
-    
+
     std::string new_record = serializeStudent(s);
 
     long old_offset = indexes[pos].offset;
