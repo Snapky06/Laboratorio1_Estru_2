@@ -163,13 +163,51 @@ bool StudentManager::deleteStudent(std::string account)
 std::optional<Student> StudentManager::searchStudent(std::string& account)
 {
     int pos = findIndexPosition(account);
-    if (pos == -1) return std::nullopt;
+    if(pos==-1)return std::nullopt;
 
-    std::ifstream f(filename_, std::ios::binary);
-    if (!f.is_open()) return std::nullopt;
+    std::ifstream f(filename_,std::ios::binary);
+    if(!f.is_open())return std::nullopt;
 
-    f.seekg(indexes[pos].offset, std::ios::beg);
-    
+    long offset = indexes[pos].offset;
+    int size = indexes[pos].size;
+
+    long page_start = (offset / PAGE_SIZE) * PAGE_SIZE;
+
+    char page[PAGE_SIZE] = {};
+
+    f.seekg(page_start,std::ios::beg);
+    f.read(page,PAGE_SIZE);
+
+    if(!f)return std::nullopt;
+
+    pageHeader header = {};
+    memcpy(&header , page , sizeof(header));
+
+    int page_data_size = PAGE_SIZE - sizeof(pageHeader);
+
+    if(header.used_bytes < 0 || header.used_bytes > page_data_size){
+        return std::nullopt;
+    }
+
+    uint32_t current_crc = CRC::Calculate(page + sizeof(pageHeader),
+                                            header.used_bytes,
+                                            CRC::CRC_32());
+
+    if(current_crc != header.crc)return std::nullopt;
+
+    long record_position_in_page = offset - page_start;
+
+    if(record_position_in_page < sizeof(pageHeader)){
+        return std::nullopt;
+    }
+
+    if (record_position_in_page + size > sizeof(pageHeader) + header.used_bytes)
+    {
+        return std::nullopt;
+    }
+
+    f.seekg(offset,std::ios::beg);
+
     Student s = deserializeStudent(f);
     if(!f)return std::nullopt;
 
