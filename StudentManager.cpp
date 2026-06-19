@@ -21,7 +21,6 @@ bool StudentManager::open()
 
     if(!f.is_open())return false;
     return loadIndex();
-    return false;
 }
 
 void StudentManager::close()
