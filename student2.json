@@ -1,7 +1,23 @@
-{
-  "account": "2024000002",
-  "name": "Luis Martinez",
-  "telephone": "888877776666",
-  "age": 21,
-  "date": "20260315"
-}
+[
+  {
+    "account": "2024000101",
+    "name": "Ana Sofia Castillo",
+    "telephone": "555999990101",
+    "age": 24,
+    "date": "20260701"
+  },
+  {
+    "account": "2024000104",
+    "name": "Carlos Eduardo Morales",
+    "telephone": "555999990104",
+    "age": 25,
+    "date": "20260704"
+  },
+  {
+    "account": "2024000107",
+    "name": "Camila Andrea Rojas",
+    "telephone": "555999990107",
+    "age": 26,
+    "date": "20260707"
+  }
+]

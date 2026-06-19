@@ -1,7 +1,86 @@
-{
-  "account": "2024000001",
-  "name": "Ana Lopez",
-  "telephone": "999988887777",
-  "age": 20,
-  "date": "20260201"
-}
+[
+  {
+    "account": "2024000101",
+    "name": "Ana Sofia Martinez",
+    "telephone": "555000010101",
+    "age": 20,
+    "date": "20260601"
+  },
+  {
+    "account": "2024000102",
+    "name": "Luis Fernando Gomez",
+    "telephone": "555000010102",
+    "age": 21,
+    "date": "20260602"
+  },
+  {
+    "account": "2024000103",
+    "name": "Maria Fernanda Lopez",
+    "telephone": "555000010103",
+    "age": 22,
+    "date": "20260603"
+  },
+  {
+    "account": "2024000104",
+    "name": "Carlos Eduardo Perez",
+    "telephone": "555000010104",
+    "age": 23,
+    "date": "20260604"
+  },
+  {
+    "account": "2024000105",
+    "name": "Valeria Isabel Torres",
+    "telephone": "555000010105",
+    "age": 20,
+    "date": "20260605"
+  },
+  {
+    "account": "2024000106",
+    "name": "Diego Alejandro Ruiz",
+    "telephone": "555000010106",
+    "age": 21,
+    "date": "20260606"
+  },
+  {
+    "account": "2024000107",
+    "name": "Camila Andrea Vasquez",
+    "telephone": "555000010107",
+    "age": 22,
+    "date": "20260607"
+  },
+  {
+    "account": "2024000108",
+    "name": "Jorge Andres Castillo",
+    "telephone": "555000010108",
+    "age": 23,
+    "date": "20260608"
+  },
+  {
+    "account": "2024000109",
+    "name": "Paula Daniela Morales",
+    "telephone": "555000010109",
+    "age": 20,
+    "date": "20260609"
+  },
+  {
+    "account": "2024000110",
+    "name": "Ricardo Antonio Herrera",
+    "telephone": "555000010110",
+    "age": 21,
+    "date": "20260610"
+  },
+  {
+    "account": "2024000111",
+    "name": "Gabriela Alejandra Ramos",
+    "telephone": "555000010111",
+    "age": 22,
+    "date": "20260611"
+  },
+  {
+    "account": "2024000112",
+    "name": "Mario Esteban Flores",
+    "telephone": "555000010112",
+    "age": 23,
+    "date": "20260612"
+  }
+]
