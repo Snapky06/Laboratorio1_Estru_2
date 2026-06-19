@@ -289,110 +289,75 @@ std::optional<Student> StudentManager::searchStudent(std::string& account)
 bool StudentManager::updateStudent(std::string& JSON)
 {
     std::ifstream json_f(JSON);
-
-    if (!json_f.is_open())
-    {
-        std::cerr << "Could not open JSON file: " << JSON << "\n";
-        return false;
-    }
+    if (!json_f.is_open()) return false;
 
     nl::json j;
-    Student s;
+    json_f >> j;
 
-    try
+    std::vector<Student> updates;
+
+    if (j.is_array())
     {
-        json_f >> j;
-        s = j.get<Student>();
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Invalid JSON: " << e.what() << "\n";
-        return false;
-    }
-
-    std::string account(s.account, sizeof(s.account));
-
-    int pos = findIndexPosition(account);
-
-    if (pos == -1)
-    {
-        std::cerr << "Account not found: " << account << "\n";
-        return false;
-    }
-
-    std::string new_record = serializeStudent(s);
-
-    long old_offset = indexes[pos].offset;
-    int old_size = indexes[pos].size;
-    int new_size = static_cast<int>(new_record.size());
-    int difference = new_size - old_size;
-
-    std::ifstream f(filename_, std::ios::binary);
-
-    if (!f.is_open())
-    {
-        std::cerr << "Could not open data file: " << filename_ << "\n";
-        return false;
-    }
-
-    f.seekg(0, std::ios::end);
-    long file_size = static_cast<long>(f.tellg());
-    f.seekg(0, std::ios::beg);
-
-    if (old_offset < 0 || old_size < 0 || old_offset + old_size > file_size)
-    {
-        std::cerr << "Index does not match data file\n";
-        return false;
-    }
-
-    std::vector<char> data(file_size);
-    f.read(data.data(), file_size);
-
-    if (!f && file_size > 0)
-    {
-        std::cerr << "Could not read data file\n";
-        return false;
-    }
-
-    f.close();
-
-    data.erase(data.begin() + old_offset, data.begin() + old_offset + old_size);
-    data.insert(data.begin() + old_offset, new_record.begin(), new_record.end());
-
-    std::ofstream out(filename_, std::ios::binary | std::ios::trunc);
-
-    if (!out.is_open())
-    {
-        std::cerr << "Could not rewrite data file\n";
-        return false;
-    }
-
-    out.write(data.data(), data.size());
-    out.close();
-
-    if (!out)
-    {
-        std::cerr << "Could not write data file\n";
-        return false;
-    }
-
-    indexes[pos].size = new_size;
-
-    for (int i = 0; i < indexes.size(); i++)
-    {
-        if (indexes[i].offset > old_offset)
+        for (int i = 0; i < j.size(); i++)
         {
-            indexes[i].offset += difference;
+            updates.push_back(j[i].get<Student>());
+        }
+    }
+    else
+    {
+        updates.push_back(j.get<Student>());
+    }
+
+    if (updates.empty()) return false;
+
+    int page_data_size = PAGE_SIZE - sizeof(pageHeader);
+
+    for (int i = 0; i < updates.size(); i++)
+    {
+        std::string account(updates[i].account, sizeof(updates[i].account));
+
+        if (findIndexPosition(account) == -1) return false;
+
+        std::string record = serializeStudent(updates[i]);
+        if (record.size() > page_data_size) return false;
+
+        for (int j = i + 1; j < updates.size(); j++)
+        {
+            int cmp = memcmp(updates[i].account,
+                             updates[j].account,
+                             sizeof(updates[i].account));
+
+            if (cmp == 0) return false;
         }
     }
 
-    if(!saveIndex())
+    std::vector<Student> students;
+
+    for (int i = 0; i < indexes.size(); i++)
     {
-        std::cerr << "Could not save index file\n";
-        return false;
+        std::string current_account(indexes[i].account, sizeof(indexes[i].account));
+        std::optional<Student> current = searchStudent(current_account);
+
+        if (!current.has_value()) return false;
+
+        Student student = current.value();
+
+        for (int j = 0; j < updates.size(); j++)
+        {
+            int cmp = memcmp(student.account,
+                             updates[j].account,
+                             sizeof(student.account));
+
+            if (cmp == 0)
+            {
+                student = updates[j];
+            }
+        }
+
+        students.push_back(student);
     }
 
-    return true;
+    return rebuildDataFile(students);
 }
 
 bool StudentManager::loadIndex()
@@ -432,6 +397,92 @@ bool StudentManager::saveIndex()
 
     f.close();
     return !f.fail();
+}
+
+bool StudentManager::rebuildDataFile(std::vector<Student>& students)
+{
+    int page_data_size = PAGE_SIZE - sizeof(pageHeader);
+
+    for (int i = 0; i < students.size(); i++)
+    {
+        std::string record = serializeStudent(students[i]);
+
+        if (record.size() > page_data_size)
+        {
+            return false;
+        }
+    }
+
+    std::ofstream out(filename_, std::ios::binary | std::ios::trunc);
+    if (!out.is_open()) return false;
+
+    std::vector<index> new_indexes;
+
+    char page[PAGE_SIZE] = {};
+    pageHeader header = {};
+    long page_start = 0;
+
+    for (int i = 0; i < students.size(); i++)
+    {
+        std::string record = serializeStudent(students[i]);
+        int record_size = static_cast<int>(record.size());
+
+        if (header.used_bytes + record_size > page_data_size)
+        {
+            memset(page + sizeof(pageHeader) + header.used_bytes,
+                   0,
+                   page_data_size - header.used_bytes);
+
+            header.crc = CRC::Calculate(page + sizeof(pageHeader),
+                                        header.used_bytes,
+                                        CRC::CRC_32());
+
+            memcpy(page, &header, sizeof(header));
+
+            out.write(page, PAGE_SIZE);
+            if (!out) return false;
+
+            page_start += PAGE_SIZE;
+            memset(page, 0, PAGE_SIZE);
+            header = {};
+        }
+
+        long offset = page_start + sizeof(pageHeader) + header.used_bytes;
+
+        memcpy(page + sizeof(pageHeader) + header.used_bytes,
+               record.data(),
+               record_size);
+
+        header.record_count++;
+        header.used_bytes += record_size;
+
+        index new_index;
+        memcpy(new_index.account, students[i].account, sizeof(students[i].account));
+        new_index.offset = offset;
+        new_index.size = record_size;
+
+        new_indexes.push_back(new_index);
+    }
+
+    if (header.record_count > 0)
+    {
+        memset(page + sizeof(pageHeader) + header.used_bytes,
+               0,
+               page_data_size - header.used_bytes);
+
+        header.crc = CRC::Calculate(page + sizeof(pageHeader),
+                                    header.used_bytes,
+                                    CRC::CRC_32());
+
+        memcpy(page, &header, sizeof(header));
+
+        out.write(page, PAGE_SIZE);
+        if (!out) return false;
+    }
+
+    indexes = new_indexes;
+
+    return saveIndex();
 }
 
 std::string StudentManager::serializeStudent(Student &s)
