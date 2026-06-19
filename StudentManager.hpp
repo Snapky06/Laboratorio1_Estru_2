@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+
 class StudentManager
 {
 public:
@@ -26,6 +27,7 @@ private:
 
     bool loadIndex();
     bool saveIndex();
+    bool rebuildDataFile(std::vector<Student>& students);
 
     std::string serializeStudent(Student& s);
     Student deserializeStudent(std::ifstream& f);
