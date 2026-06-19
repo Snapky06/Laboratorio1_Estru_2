@@ -187,48 +187,33 @@ bool StudentManager::addRegister(std::string& JSON)
 bool StudentManager::deleteStudent(std::string account)
 {
     int pos = findIndexPosition(account);
-    if (pos == -1) return false;
 
-    long deleted_offset = indexes[pos].offset;
-    int deleted_size = indexes[pos].size;
-
-    std::ifstream f(filename_, std::ios::binary);
-    if (!f.is_open()) return false;
-
-    f.seekg(0, std::ios::end);
-    long file_size = static_cast<long>(f.tellg());
-    f.seekg(0, std::ios::beg);
-
-    if (deleted_offset < 0 || deleted_size < 0 || deleted_offset + deleted_size > file_size)
+    if (pos == -1)
     {
         return false;
     }
 
-    std::vector<char> data(file_size);
-    f.read(data.data(), file_size);
-
-    if (!f && file_size > 0) return false;
-
-    data.erase(data.begin() + deleted_offset,
-               data.begin() + deleted_offset + deleted_size);
-
-    std::ofstream out(filename_, std::ios::binary | std::ios::trunc);
-    if (!out.is_open()) return false;
-
-    out.write(data.data(), data.size());
-    if (!out) return false;
-
-    indexes.erase(indexes.begin() + pos);
+    std::vector<Student> students;
 
     for (int i = 0; i < indexes.size(); i++)
     {
-        if (indexes[i].offset > deleted_offset)
+        if (i == pos)
         {
-            indexes[i].offset -= deleted_size;
+            continue;
         }
+
+        std::string current_account(indexes[i].account, sizeof(indexes[i].account));
+        std::optional<Student> student = searchStudent(current_account);
+
+        if (!student.has_value())
+        {
+            return false;
+        }
+
+        students.push_back(student.value());
     }
 
-    return saveIndex();
+    return rebuildDataFile(students);
 }
 
 std::optional<Student> StudentManager::searchStudent(std::string& account)
