@@ -1,65 +1,51 @@
 # Student Records Manager
 
-Command-line program in C++ for storing student records in a binary data file with a binary primary index.
+Command-line C++ program for storing student records in a binary data file with a binary primary index.
 
-JSON files are used only as input for adding and updating students. The stored records are kept in `.dat` and `.idx` files.
-=====================================================================================================================================
-## Compile
+JSON files are used as input for adding and updating students. The real stored data is kept in `.dat` pages, and the primary index is stored in a `.idx` file.
+
+## Build
 
 cmake -S . -B build
 cmake --build build
 
-Run:
+The executable is created as:
 
 .\build\student.exe
-=====================================================================================================================================
+
 ## File Names
 
-The program adds extensions automatically:
+Extensions are added automatically:
 
---file student   uses student.dat
---index student  uses student.idx
---student data1  uses data1.json
+--file student   -> student.dat
+--index index    -> index.idx
+--student data   -> data.json
 
 If `--index` is not provided, the index uses the same base name as `--file`.
-=====================================================================================================================================
-## Commands
-=====================================================================================================================================
-### Add
 
-Adds one student from a JSON file.
+## Commands
+
+Add students from a JSON file:
 
 .\build\student.exe --file student add --student student1
 
-This reads `student1.json`, writes the new record into `student.dat`, and inserts a new entry into `student.idx`. The account must not already exist.
-=====================================================================================================================================
-### Search
-
-Searches for a student by account number.
+Search a student by account:
 
 .\build\student.exe --file student search 2024000001
 
-This uses the index to find the record position in the data file and prints the student information.
-=====================================================================================================================================
-### Delete
-
-Deletes a student by account number.
+Delete a student by account:
 
 .\build\student.exe --file student delete 2024000001
 
-This project uses hard delete, so the record is physically removed from the data file. After removing it, the index is updated so the remaining offsets stay correct.
-=====================================================================================================================================
-### Update
-
-Updates an existing student using a JSON file.
+Update students from a JSON file:
 
 .\build\student.exe --file student update --student student1
 
-The account inside the JSON is used to find the record. The record is replaced with the new information, and the index is adjusted if the record size changes.
-=====================================================================================================================================
-## JSON Format
+## JSON Input
 
-Each JSON file contains one student:
+`add` and `update` accept either one student object or an array of students.
+
+Single student:
 
 {
   "account": "2024000001",
@@ -69,31 +55,103 @@ Each JSON file contains one student:
   "date": "20260201"
 }
 
-Fixed-size fields:
+Multiple students:
 
-account   10 bytes
-telephone 12 bytes
-date      8 bytes, YYYYMMDD
-=====================================================================================================================================
-## Examples
+[
+  {
+    "account": "2024000001",
+    "name": "Ana Lopez",
+    "telephone": "999988887777",
+    "age": 20,
+    "date": "20260201"
+  },
+  {
+    "account": "2024000002",
+    "name": "Luis Martinez",
+    "telephone": "888877776666",
+    "age": 21,
+    "date": "20260315"
+  }
+]
 
-.\build\student.exe --file student add --student student1
-.\build\student.exe --file student add --student student2
-.\build\student.exe --file student add --student student3
+Field sizes:
 
-.\build\student.exe --file student search 2024000001
-.\build\student.exe --file student delete 2024000002
-.\build\student.exe --file student update --student student3
-=====================================================================================================================================
+account   10 characters
+telephone 12 characters
+date      8 characters, YYYYMMDD
+
 ## Storage
 
-Each record is stored in the data file as:
+Each student record is serialized as:
 
 account[10] + name_size + name + telephone[12] + age + date[8]
 
-The index stores:
+The data file is divided into fixed-size pages:
 
-account + offset + size
+PAGE_SIZE = 512 bytes
+
+Each page starts with:
+
+struct pageHeader
+{
+    int record_count;
+    int used_bytes;
+    uint32_t crc;
+};
+
+Page layout:
+
+[pageHeader][used record bytes][zero padding]
+
+The unused space inside a page is internal fragmentation. Those bytes are kept as zeroes.
+
+## CRC
+
+Each page stores a CRC-32 value in its header.
+
+The CRC is calculated only over the used record bytes:
+
+used record bytes only
+
+It does not include:
+
+pageHeader
+zero padding
+
+When searching, the page CRC is checked before reading the record. If the CRC does not match, the search fails.
+
+## Index
+
+The primary index stores:
+
+struct index
+{
+    char account[10];
+    long offset;
+    int size;
+};
+
+Meaning:
+
+account -> primary key
+offset  -> byte where the record starts in the .dat file
+size    -> real size of the serialized record
 
 The index is loaded into memory, kept ordered by account, and saved back to disk after changes.
-=====================================================================================================================================
+
+## Delete And Update
+
+The project uses hard delete.
+
+Because the data file is paged and every page has a CRC, delete and update rebuild the data file instead of cutting bytes directly.
+
+The rebuild process is:
+
+read valid students
+apply delete or update
+rewrite pages
+recalculate CRC
+rebuild index offsets
+save index
+
+This keeps page sizes, CRC values, zero padding, and index offsets correct.
